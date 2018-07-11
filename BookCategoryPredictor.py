@@ -12,6 +12,7 @@ import pydotplus
 from matplotlib import pyplot as plt
 import graphviz
 from IPython.display import Image, display
+from sklearn import tree
 
 def viewPydot(pdot):
     plt = Image(pdot.create_png())
@@ -61,10 +62,13 @@ X = df[cols]
 y = df['cat']
 X_train, X_test, y_train, y_test = train_test_split(X,y)
 
-tree = DecisionTreeClassifier(max_leaf_nodes=10)
-tree.fit(X_train, y_train)
+dtree = DecisionTreeClassifier(max_leaf_nodes=10)
+dtree.fit(X_train, y_train)
 
-score = tree.score(X_test, y_test)
+score = dtree.score(X_test, y_test)
 print("Score: " + str(score))
 
 ### PRINT TREE ###
+dot_data = tree.export_graphviz(dtree, out_file=None)
+graph = graphviz.Source(dot_data)
+graph.render("iris")
