@@ -3,13 +3,16 @@
 import Models
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cross_validation import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
 # step1 - Acquisire in un dataframe tutti i dati del DB
 # step2 - Rimuovere i campi non utili
 # step3 - Fill dei campi vuoti con il valore medio e fill delle descrizioni con il titolo
 # step4 - matrice termini-doc con le long description
 # step5 - unione della matrice con le altre feature
-# step6 - addestramento modelli predittivi
+# step6 - creazione di training set e test set
+# step7 - addestramento modelli predittivi
 
 books = Models.GetAllBooks()
 books_df = pd.DataFrame(books)
@@ -26,8 +29,29 @@ books_df.drop('categories', inplace=True, axis=1)
 
 vect = CountVectorizer(ngram_range=(1,2),stop_words='english')
 matrix = vect.fit_transform(books_df['longDescription']) # restituisce la matrice termini-doc
+print(len(vect.get_feature_names()))
 freqs = [(word, matrix.getcol(idx).sum()) for word, idx in vect.vocabulary_.items()]
 # sort from largest to smallest
-for phrase, times in sorted(freqs, key=lambda x: -x[1])[:25]:
-    print(phrase, times)
+#for phrase, times in sorted(freqs, key=lambda x: -x[1])[:25]:
+    #print(phrase, times)
 
+dtMatrix = pd.DataFrame(matrix.todense(), columns=vect.get_feature_names())
+df = pd.concat([books_df, dtMatrix], axis=1)
+status_dummy = pd.get_dummies(df.status, prefix="status")
+df = pd.concat([df, status_dummy], axis=1)
+drop_columns = ['longDescription', 'shortDescription', 'title', 'status', 'publishedDate', 'bid']
+df.drop(drop_columns, inplace=True, axis=1)
+print(df.shape) #ok
+print(list(df))
+
+cols = list(df)
+cols.remove('cat')
+X = df[cols]
+y = df['cat']
+X_train, X_test, y_train, y_test = train_test_split(X,y)
+
+tree = DecisionTreeClassifier()
+tree.fit(X_train, y_train)
+
+score = tree.score(X_test, y_test)
+print("Score: " + str(score))
