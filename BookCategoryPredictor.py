@@ -50,7 +50,7 @@ X = df[cols]
 y = df['cat']
 X_train, X_test, y_train, y_test = train_test_split(X,y)
 
-tree = DecisionTreeClassifier()
+tree = DecisionTreeClassifier(max_leaf_nodes=10)
 tree.fit(X_train, y_train)
 
 score = tree.score(X_test, y_test)
