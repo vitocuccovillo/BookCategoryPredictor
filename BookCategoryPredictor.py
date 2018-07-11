@@ -5,6 +5,17 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.externals.six import StringIO
+from IPython.display import Image
+from sklearn.tree import export_graphviz
+import pydotplus
+from matplotlib import pyplot as plt
+import graphviz
+from IPython.display import Image, display
+
+def viewPydot(pdot):
+    plt = Image(pdot.create_png())
+    display(plt)
 
 # step1 - Acquisire in un dataframe tutti i dati del DB
 # step2 - Rimuovere i campi non utili
@@ -55,3 +66,5 @@ tree.fit(X_train, y_train)
 
 score = tree.score(X_test, y_test)
 print("Score: " + str(score))
+
+### PRINT TREE ###
