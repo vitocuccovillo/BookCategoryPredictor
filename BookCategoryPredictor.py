@@ -14,10 +14,6 @@ import graphviz
 from IPython.display import Image, display
 from sklearn import tree
 
-def viewPydot(pdot):
-    plt = Image(pdot.create_png())
-    display(plt)
-
 # step1 - Acquisire in un dataframe tutti i dati del DB
 # step2 - Rimuovere i campi non utili
 # step3 - Fill dei campi vuoti con il valore medio e fill delle descrizioni con il titolo
@@ -30,31 +26,34 @@ books = Models.GetAllBooks()
 books_df = pd.DataFrame(books)
 books_df.set_index('bid')
 
-drop_columns = ['thumbnailUrl', 'isbn', '_id','authors']
+drop_columns = ['thumbnailUrl', 'isbn', '_id']
 books_df.drop(drop_columns, inplace=True, axis=1)
 
 books_df['longDescription'].fillna(books_df['title'], inplace=True)
 books_df['pageCount'].fillna(books_df['pageCount'].median, inplace=True)
 books_df['categories'].fillna('none', inplace=True)
-books_df['cat'] = books_df['categories'].map(lambda x: x[0] if len(x) > 0 else 'default')
+books_df['cat'] = books_df['categories'].map(lambda x: x[0] if len(x) > 0 else 'default') # da una lista, prendo solo il primo valore
+books_df['aut'] = books_df['authors'].map(lambda x: x[0] if len(x) > 0 else 'default') # da una lista, prendo solo il primo valore
 books_df.drop('categories', inplace=True, axis=1)
+books_df.drop('authors', inplace=True, axis=1)
 
 vect = CountVectorizer(ngram_range=(1,2),stop_words='english')
 matrix = vect.fit_transform(books_df['longDescription']) # restituisce la matrice termini-doc
 print(len(vect.get_feature_names()))
 freqs = [(word, matrix.getcol(idx).sum()) for word, idx in vect.vocabulary_.items()]
-# sort from largest to smallest
-#for phrase, times in sorted(freqs, key=lambda x: -x[1])[:25]:
-    #print(phrase, times)
 
 dtMatrix = pd.DataFrame(matrix.todense(), columns=vect.get_feature_names())
 df = pd.concat([books_df, dtMatrix], axis=1)
-status_dummy = pd.get_dummies(df.status, prefix="status")
-df = pd.concat([df, status_dummy], axis=1)
-drop_columns = ['longDescription', 'shortDescription', 'title', 'status', 'publishedDate', 'bid']
+status_dummy = pd.get_dummies(df.status, prefix="status") # creo delle variabili numeriche per usare una categorica
+authors_dummy = pd.get_dummies(df.aut, prefix="aut")  # creo delle variabili numeriche per usare una categorica
+df = pd.concat([df, status_dummy], axis=1) # rimuovo le vecchie variabili
+df = pd.concat([df, authors_dummy], axis=1) # rimuovo le vecchie variabili
+drop_columns = ['longDescription', 'shortDescription', 'title', 'status', 'publishedDate', 'bid', 'aut']
 df.drop(drop_columns, inplace=True, axis=1)
 print(df.shape) #ok
 print(list(df))
+
+# todo: solve underfitting introducing other authors or adding new features
 
 cols = list(df)
 cols.remove('cat')
