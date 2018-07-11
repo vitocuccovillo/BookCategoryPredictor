@@ -11,4 +11,4 @@ print(df.keys())
 client.close()
 
 df['longDescription'].fillna(df['title'], inplace=True)
-print(df.head())
+print(df['title'].head())
