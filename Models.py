@@ -1,13 +1,10 @@
-from functools import partial
-from typing import Any, Union
-
 from mongoengine import *
 import datetime
 from pymongo import MongoClient # different approach
 #mongoengine ORM used, (it is not a ORM, but a Document-Object Mapper. In mongo you don't have relations but documents
-from mongoengine import QuerySetManager
 
 
+# class for mongoengine
 class Book(Document):
     _id = StringField(required=True)
     bid = IntField()
@@ -24,12 +21,15 @@ class Book(Document):
     meta = {'collection': 'books'}
 
 
+# using mongoengine
 def getBooks():
 
     connect('local')
     result = Book.objects
     return result
 
+
+# using pymongo
 def GetAllBooks():
 
     client = MongoClient('localhost', 27017)
