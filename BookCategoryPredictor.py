@@ -71,4 +71,4 @@ print("Score: " + str(score))
 ### PRINT TREE ###
 dot_data = tree.export_graphviz(dtree, out_file=None)
 graph = graphviz.Source(dot_data)
-graph.render("iris")
+graph.render("book_tree")
